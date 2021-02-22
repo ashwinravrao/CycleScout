@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">CycleScout</string>
+    <string name="open_now">Open Now</string>
+    <string name="closed_now">Closed Now</string>
 </resources>
