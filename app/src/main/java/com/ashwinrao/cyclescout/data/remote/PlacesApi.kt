@@ -23,4 +23,13 @@ interface PlacesApi {
     suspend fun fetchNearbyShops(
         @Query("location") formattedLatLng: String,
         @Query("pagetoken") nextPageToken: String): NearbySearch?
+
+    /**
+     * Request a photo for each shop in our result set. In order to get the correct photo, we must pass in the reference String from
+     * NearbySearch.Result.Photo
+     *
+     * @return URL for an image in its original aspect ratio with a max width of 1000px (later resized for thumbnails)
+     */
+    @GET("photo?&maxwidth=1000")
+    suspend fun fetchPhotoURL(@Query("photoreference") photoReference: String): String
 }
