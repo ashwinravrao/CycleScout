@@ -12,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 val networkModule = module {
     factory { AuthInterceptor(androidContext()) }
     factory { ConnectivityInterceptor(androidContext()) }
-    factory { provideOkHttpClient(get()) }
+    factory { provideOkHttpClient(get(), get()) }
     factory { providePlacesApi(get()) }
     single { provideRetrofit(androidContext(), get()) }
 }
@@ -22,8 +22,8 @@ fun provideRetrofit(context: Context, okHttpClient: OkHttpClient): Retrofit {
         .addConverterFactory(GsonConverterFactory.create()).build()
 }
 
-fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
-    return OkHttpClient().newBuilder().addInterceptor(authInterceptor).build()
+fun provideOkHttpClient(authInterceptor: AuthInterceptor, connectivityInterceptor: ConnectivityInterceptor): OkHttpClient {
+    return OkHttpClient().newBuilder().addInterceptor(authInterceptor).addInterceptor(connectivityInterceptor).build()
 }
 
 fun providePlacesApi(retrofit: Retrofit): PlacesApi = retrofit.create(PlacesApi::class.java)

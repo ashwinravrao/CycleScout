@@ -71,9 +71,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: GoogleMap?) {
         // Hardcoding in the interest of time; normally would get user input or device location
-        val startLocation =
-            LatLng(41.88744282963304, -87.65274711534346)   // SRAM HQ in downtown Chicago
-
+        startLocation = LatLng(41.88744282963304, -87.65274711534346)   // SRAM HQ in downtown Chicago
         map?.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, 12f))
         map?.uiSettings?.isTiltGesturesEnabled = false
         map?.uiSettings?.isZoomGesturesEnabled = false
@@ -81,7 +79,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         map?.uiSettings?.isMapToolbarEnabled = false
         val marker = map?.addMarker(MarkerOptions().position(startLocation))
         if (marker != null) animateDropPin(marker, 500)
-        fetchNearbyShops(map, startLocation)
+        fetchNearbyShops(startLocation)
     }
 
     /**
@@ -90,22 +88,32 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
      * such as populating our RecyclerView and dropping pins (adding markers) to the map.
      */
 
-    private fun fetchNearbyShops(map: GoogleMap?, locationBias: LatLng) {
+    private fun fetchNearbyShops(locationBias: LatLng) {
+        var message: String? = null
         CoroutineScope(Dispatchers.IO).launch {
-            val nearbyShops = mainViewModel.fetchNearbyShops(locationBias)
+            var nearbyShops: NearbySearch? = null
+            try {
+                nearbyShops = mainViewModel.fetchNearbyShops(locationBias)
+            } catch (e: Exception) {
+                message = e.message
+                Log.d(TAG, "fetchNearbyShops: ${e.message}")
+            }
             withContext(Dispatchers.Main) {
                 if (nearbyShops != null) {
                     when (nearbyShops.status) {
                         "OK" -> populateShopList(nearbyShops.results)
-                        "ZERO_RESULTS" -> showNoResultsPlaceholder()
-                        else -> showNoResultsPlaceholder(true)
+                        "ZERO_RESULTS" -> showPlaceholder(errorStatus = false)
+                        else -> showPlaceholder(errorStatus = true)
                     }
+                    Log.d(TAG, "fetchNearbyShops: ${nearbyShops.status}")
+                } else {
+                    showPlaceholder(errorStatus = true, message)
                 }
             }
         }
     }
 
-    private fun showNoResultsPlaceholder(errorStatus: Boolean = false) {
+    private fun showPlaceholder(errorStatus: Boolean, message: String? = null) {
         if (errorStatus) {
             placeholder.icon.setImageDrawable(
                 ResourcesCompat.getDrawable(
@@ -116,7 +124,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             )
             placeholder.icon.scaleX = 0.8f
             placeholder.icon.scaleY = 0.8f
-            placeholder.label.text = this.resources.getString(R.string.label_placeholder_error)
+            placeholder.label.text = message ?: this.resources.getString(R.string.label_placeholder_error)
         } else {
             placeholder.icon.setImageDrawable(
                 ResourcesCompat.getDrawable(
