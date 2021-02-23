@@ -2,4 +2,7 @@
     <string name="app_name">CycleScout</string>
     <string name="open_now">Open Now</string>
     <string name="closed_now">Closed Now</string>
+    <string name="label_placeholder_no_results">Sorry, we couldn\'t find anything nearby</string>
+    <string name="label_placeholder_error">Oops! Something went wrong</string>
+
 </resources>

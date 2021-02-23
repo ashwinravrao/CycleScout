@@ -14,18 +14,10 @@
         android:layout_height="48dp"
         android:layout_margin="24dp"
         app:cardCornerRadius="8dp"
+        app:cardBackgroundColor="@color/slightly_darker_gray"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/shop_photo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_background" />
-
-    </com.google.android.material.card.MaterialCardView>
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -44,8 +36,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:textStyle="bold"
-            tools:text="Drop the LBS" />
+            android:background="@color/slightly_darker_gray"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/open_now"
@@ -54,8 +46,7 @@
             android:layout_gravity="bottom"
             android:layout_marginTop="8dp"
             android:fontFamily="sans-serif-condensed"
-            tools:text="Open Now"
-            tools:textColor="@color/green" />
+            android:background="@color/slightly_darker_gray" />
 
     </LinearLayout>
 
