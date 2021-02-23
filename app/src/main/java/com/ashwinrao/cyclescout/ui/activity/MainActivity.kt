@@ -1,5 +1,6 @@
 package com.ashwinrao.cyclescout.ui.activity
 
+import android.graphics.drawable.VectorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -10,13 +11,14 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ashwinrao.cyclescout.R
 import com.ashwinrao.cyclescout.animateDropPin
+import com.ashwinrao.cyclescout.bitmapFromDrawable
 import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
 import com.ashwinrao.cyclescout.databinding.ActivityMainBinding
-import com.ashwinrao.cyclescout.databinding.LayoutPlaceholderBinding
 import com.ashwinrao.cyclescout.ui.adapter.NearbyShopAdapter
 import com.ashwinrao.cyclescout.viewmodel.MainViewModel
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +32,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
     private val TAG = this@MainActivity.javaClass.simpleName
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var placeholder: LayoutPlaceholderBinding
     private lateinit var mapFragment: SupportMapFragment
     private lateinit var shopList: RecyclerView
     private lateinit var shimmer: ShimmerFrameLayout
@@ -73,14 +74,24 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
     }
 
     override fun onMapReady(map: GoogleMap?) {
-        // Hardcoding in the interest of time; normally would get user input or device location
-        startLocation = LatLng(41.88744282963304, -87.65274711534346)   // SRAM HQ in downtown Chicago
-        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, 12f))
+        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, 14f))
         map?.uiSettings?.isTiltGesturesEnabled = false
         map?.uiSettings?.isZoomGesturesEnabled = false
         map?.uiSettings?.isScrollGesturesEnabled = false
         map?.uiSettings?.isMapToolbarEnabled = false
-        val marker = map?.addMarker(MarkerOptions().position(startLocation))
+        val marker = map?.addMarker(
+            MarkerOptions().position(startLocation).icon(
+                BitmapDescriptorFactory.fromBitmap(
+                    bitmapFromDrawable(
+                        ResourcesCompat.getDrawable(
+                            this.resources,
+                            R.drawable.ic_bicycle,
+                            this.theme
+                        ) as VectorDrawable
+                    )
+                )
+            ).title(this.getString(R.string.label_location)).anchor(0.5f, 0.5f)
+        )
         if (marker != null) animateDropPin(marker, 500)
         fetchNearbyShops(startLocation)
     }
@@ -144,23 +155,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
         hideShopList()
     }
 
-    private fun hideMap() {
-        binding.mapContainer.visibility = View.GONE
     }
 
-    private fun showMap() {
-        binding.mapContainer.visibility = View.VISIBLE
-    }
 
     private fun hideShopList() {
-        hideMap()
         adapter.data = mutableListOf()
         adapter.notifyDataSetChanged()
         placeholder.root.visibility = View.VISIBLE
     }
 
     private fun showShopList() {
-        showMap()
         shopList.visibility = View.VISIBLE
         placeholder.root.visibility = View.GONE
     }

@@ -1,15 +1,14 @@
 package com.ashwinrao.cyclescout
 
 import android.content.Context
-import android.graphics.Rect
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.VectorDrawable
 import android.os.Handler
 import android.os.SystemClock
 import android.util.TypedValue
-import android.view.View
 import android.view.animation.Interpolator
-import androidx.annotation.Nullable
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.maps.model.Marker
 import kotlin.math.max
 
@@ -35,4 +34,16 @@ fun animateDropPin(marker: Marker, duration: Long) {
             }
         }
     })
+}
+
+// Adapted from https://stackoverflow.com/questions/32716570/decoding-svg-image-to-bitmap
+fun bitmapFromDrawable(vectorDrawable: VectorDrawable): Bitmap? {
+    val bitmap = Bitmap.createBitmap(
+        vectorDrawable.intrinsicWidth,
+        vectorDrawable.intrinsicHeight, Bitmap.Config.ARGB_8888
+    )
+    val canvas = Canvas(bitmap)
+    vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight())
+    vectorDrawable.draw(canvas)
+    return bitmap
 }
