@@ -7,7 +7,7 @@ import retrofit2.http.Query
 interface PlacesApi {
 
     /**
-     * Fetches the nearest bicycle repair shops to our specified coordinates, matching our place type and keyword.
+     * Fetches the nearest bicycle shops to our specified coordinates, matching our place type and keyword.
      * The type and keyword seem redundant but during manual testing it was found to provide more exhaustive results than
      * either parameter alone.
      */

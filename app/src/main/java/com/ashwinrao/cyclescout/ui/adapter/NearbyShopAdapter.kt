@@ -3,6 +3,7 @@ package com.ashwinrao.cyclescout.ui.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.ashwinrao.cyclescout.R
 import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
@@ -11,6 +12,8 @@ import com.ashwinrao.cyclescout.databinding.ViewHolderNearbyShopBinding
 class NearbyShopAdapter : RecyclerView.Adapter<NearbyShopAdapter.NearbyShopViewHolder>() {
 
     var data: List<NearbySearch.Result> = mutableListOf()
+
+    fun watchData() = MutableLiveData(data)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NearbyShopViewHolder =
         NearbyShopViewHolder(ViewHolderNearbyShopBinding.inflate(LayoutInflater.from(parent.context), parent, false))

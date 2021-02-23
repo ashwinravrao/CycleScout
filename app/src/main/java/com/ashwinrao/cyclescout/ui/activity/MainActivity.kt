@@ -2,10 +2,14 @@ package com.ashwinrao.cyclescout.ui.activity
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ashwinrao.cyclescout.R
 import com.ashwinrao.cyclescout.animateDropPin
 import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
@@ -23,7 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout.OnRefreshListener {
 
     private val TAG = this@MainActivity.javaClass.simpleName
 
@@ -31,6 +35,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var placeholder: LayoutPlaceholderBinding
     private lateinit var mapFragment: SupportMapFragment
     private lateinit var shopList: RecyclerView
+    private lateinit var shimmer: ShimmerFrameLayout
+    private lateinit var startLocation: LatLng
 
     private lateinit var adapter: NearbyShopAdapter
     private val mainViewModel: MainViewModel by viewModel()
@@ -40,9 +46,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         placeholder = binding.placeholder
+        shimmer = binding.shimmer
+        binding.swipeRefreshLayout.setOnRefreshListener(this@MainActivity)
 
-        initializeMap()
         initializeShopList()
+        initializeMap()
     }
 
     private fun initializeMap() {
@@ -51,20 +59,20 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun initializeShopList() {
-        binding.shimmer.visibility = View.VISIBLE
-        binding.shimmer.startShimmer()
+        startShimmer()
         shopList = binding.recyclerView
         shopList.setHasFixedSize(true)
         shopList.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         adapter = NearbyShopAdapter()
         shopList.adapter = adapter
+
+        // swipe to refresh animation will be dismissed when the adapter data set has changed (covers valid and error cases)
+        adapter.watchData().observe(this@MainActivity) { binding.swipeRefreshLayout.isRefreshing = false }
     }
 
     private fun populateShopList(shops: List<NearbySearch.Result>) {
-        binding.shimmer.stopShimmer()
-        binding.shimmer.visibility = View.GONE
-        placeholder.root.visibility = View.GONE
-        shopList.visibility = View.VISIBLE
+        stopShimmer()
+        showShopList()
         adapter.data = shops
         adapter.notifyDataSetChanged()
     }
@@ -137,7 +145,43 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             placeholder.icon.scaleY = 1f
             placeholder.label.text = this.resources.getString(R.string.label_placeholder_no_results)
         }
-        shopList.visibility = View.GONE
+        stopShimmer()
+        hideShopList()
+    }
+
+    private fun hideMap() {
+        binding.mapContainer.visibility = View.GONE
+    }
+
+    private fun showMap() {
+        binding.mapContainer.visibility = View.VISIBLE
+    }
+
+    private fun hideShopList() {
+        hideMap()
+        adapter.data = mutableListOf()
+        adapter.notifyDataSetChanged()
         placeholder.root.visibility = View.VISIBLE
+    }
+
+    private fun showShopList() {
+        showMap()
+        shopList.visibility = View.VISIBLE
+        placeholder.root.visibility = View.GONE
+    }
+
+    private fun startShimmer() {
+        shimmer.visibility = View.VISIBLE
+        shimmer.startShimmer()
+    }
+
+    private fun stopShimmer() {
+        shimmer.stopShimmer()
+        shimmer.visibility = View.GONE
+    }
+
+    override fun onRefresh() {
+        initializeShopList()
+        fetchNearbyShops(startLocation)
     }
 }
