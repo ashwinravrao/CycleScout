@@ -1,18 +1,19 @@
 package com.ashwinrao.cyclescout.ui.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.ashwinrao.cyclescout.R
-import com.ashwinrao.cyclescout.data.remote.Response
+import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
 import com.ashwinrao.cyclescout.databinding.ViewHolderNearbyShopBinding
 
 class NearbyShopAdapter : RecyclerView.Adapter<NearbyShopAdapter.NearbyShopViewHolder>() {
 
-    var data: List<Response.Result> = mutableListOf()
+    var data: List<NearbySearch.Result> = mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NearbyShopViewHolder =
-        NearbyShopViewHolder(ViewHolderNearbyShopBinding.inflate(LayoutInflater.from(parent.context)))
+        NearbyShopViewHolder(ViewHolderNearbyShopBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
     override fun onBindViewHolder(holder: NearbyShopViewHolder, position: Int) {
         val binding = ViewHolderNearbyShopBinding.bind(holder.itemView)
@@ -25,7 +26,7 @@ class NearbyShopAdapter : RecyclerView.Adapter<NearbyShopAdapter.NearbyShopViewH
             binding.openNow.text = context.getString(R.string.closed_now)
             binding.openNow.setTextColor(context.resources.getColor(R.color.red, context.theme))
         }
-        // TODO: Set image thumbnail using Glide
+        // todo: set image thumbnail using Glide
     }
 
     override fun getItemCount(): Int = data.size
