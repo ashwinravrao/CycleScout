@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -65,9 +63,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
         shopList.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         adapter = NearbyShopAdapter()
         shopList.adapter = adapter
-
-        // swipe to refresh animation will be dismissed when the adapter data set has changed (covers valid and error cases)
-        adapter.watchData().observe(this@MainActivity) { binding.swipeRefreshLayout.isRefreshing = false }
     }
 
     private fun populateShopList(shops: List<NearbySearch.Result>) {
@@ -180,8 +175,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
         shimmer.visibility = View.GONE
     }
 
+    private fun clearShopList() {
+        adapter.data = mutableListOf()
+        adapter.notifyDataSetChanged()
+        placeholder.root.visibility = View.GONE
+    }
+
     override fun onRefresh() {
-        initializeShopList()
+        clearShopList()
+        startShimmer()
         fetchNearbyShops(startLocation)
+
+        // swipe to refresh will be dismissed when fresh data is bound to the recyclerview adapter or the placeholder is shown
+        adapter.watchData().observe(this@MainActivity) { binding.swipeRefreshLayout.isRefreshing = false }
     }
 }
