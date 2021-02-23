@@ -5,5 +5,5 @@ import org.koin.dsl.module
 
 val viewModelModule = module {
     viewModel { MainViewModel(get()) }
-    // todo: add: viewModel { DetailViewModel(get()) }
+    viewModel { DetailViewModel(get()) }
 }
