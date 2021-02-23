@@ -33,30 +33,31 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
     private val tag = this@MainActivity.javaClass.simpleName
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var mapFragment: SupportMapFragment
     private lateinit var shopList: RecyclerView
-    private lateinit var shimmerEffect: ShimmerFrameLayout
     private lateinit var adapter: NearbyShopAdapter
 
     private var snackBar: Snackbar? = null
     private val mainViewModel: MainViewModel by viewModel()
 
-    // Hardcoding in the interest of time; normally would get user input or device location
+    /**
+     * Start location that serves as the bias for Google Places API calls.
+     * The value has been hardcoded in the interest of time. Normally I would want to either
+     * get user input or access the device location.
+     */
     private val startLocation = LatLng(41.88744282963304, -87.65274711534346)   // SRAM HQ in downtown Chicago
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        shimmerEffect = binding.shimmer
         binding.swipeRefreshLayout.setOnRefreshListener(this@MainActivity)
+        setContentView(binding.root)
 
         initializeShopList()
         initializeMap()
     }
 
     private fun initializeMap() {
-        mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
 
@@ -80,7 +81,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
     private fun fetchDataLazily() {
         fetchNearbyShops(startLocation)
         shopList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-
+            // todo: implement
         })
     }
 
@@ -156,20 +157,20 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
     }
 
     private fun startLoadingAnimation() {
-        shimmerEffect.visibility = View.VISIBLE
-        shimmerEffect.startShimmer()
+        binding.shimmer.visibility = View.VISIBLE
+        binding.shimmer.startShimmer()
     }
 
     private fun stopLoadingAnimation(hideLayout: Boolean = true) {
-        shimmerEffect.stopShimmer()
-        if (hideLayout) shimmerEffect.visibility = View.GONE
+        binding.shimmer.stopShimmer()
+        if (hideLayout) binding.shimmer.visibility = View.GONE
     }
 
     override fun onRefresh() {
         fetchNearbyShops(startLocation)
         snackBar?.dismiss()
 
-        // swipe to refresh will be dismissed when fresh data is bound to the recyclerview adapter
+        // swipe to refresh animation will be dismissed when fresh data is bound to the recyclerview adapter
         adapter.watchData().observe(this@MainActivity) {
             binding.swipeRefreshLayout.isRefreshing = false
         }
