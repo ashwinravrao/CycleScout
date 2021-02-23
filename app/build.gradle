@@ -17,13 +17,9 @@ android {
     }
 
     buildTypes {
-        debug {
-            buildConfigField "String", "PLACES_BASE_URL", places_base_url
-        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "PLACES_BASE_URL", places_base_url
         }
     }
     compileOptions {
@@ -68,4 +64,10 @@ dependencies {
     // Coroutines (for performing work asynchronously)
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
+
+    // Facebook Shimmer Animation (loading progress indicator)
+    implementation 'com.facebook.shimmer:shimmer:0.5.0'
+
+    // for implementing swipe to refresh
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 }
