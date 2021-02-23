@@ -1,6 +1,8 @@
 package com.ashwinrao.cyclescout.data.remote
 
+import android.content.Context
 import com.ashwinrao.cyclescout.BuildConfig
+import com.ashwinrao.cyclescout.R
 import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
@@ -12,11 +14,11 @@ val networkModule = module {
     factory { ConnectivityInterceptor(androidContext()) }
     factory { provideOkHttpClient(get()) }
     factory { providePlacesApi(get()) }
-    single { provideRetrofit(get()) }
+    single { provideRetrofit(androidContext(), get()) }
 }
 
-fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
-    return Retrofit.Builder().baseUrl(BuildConfig.PLACES_BASE_URL).client(okHttpClient)
+fun provideRetrofit(context: Context, okHttpClient: OkHttpClient): Retrofit {
+    return Retrofit.Builder().baseUrl(context.getString(R.string.places_url)).client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create()).build()
 }
 

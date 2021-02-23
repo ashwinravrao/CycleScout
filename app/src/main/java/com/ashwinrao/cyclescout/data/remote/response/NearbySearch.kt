@@ -1,9 +1,9 @@
-package com.ashwinrao.cyclescout.data.remote
+package com.ashwinrao.cyclescout.data.remote.response
 
 
 import com.google.gson.annotations.SerializedName
 
-data class Response(
+data class NearbySearch(
     @SerializedName("html_attributions")
     val htmlAttributions: List<Any>,
     @SerializedName("next_page_token")

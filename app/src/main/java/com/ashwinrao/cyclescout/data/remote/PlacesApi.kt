@@ -1,5 +1,6 @@
 package com.ashwinrao.cyclescout.data.remote
 
+import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -11,7 +12,7 @@ interface PlacesApi {
      * either parameter alone.
      */
     @GET("nearbysearch/json?&rankby=distance&type=bicycle_store&keyword=bicycle+repair+shop")
-    suspend fun fetchNearbyShops(@Query("location") formattedLatLng: String): Response?
+    suspend fun fetchNearbyShops(@Query("location") formattedLatLng: String): NearbySearch?
 
     /**
      * Overload of above method for requesting the next set of results. By default the Places API limits responses to 20 results.
@@ -21,5 +22,5 @@ interface PlacesApi {
     @GET("nearbysearch/json?&rankby=distance&type=bicycle_store&keyword=bicycle+repair+shop")
     suspend fun fetchNearbyShops(
         @Query("location") formattedLatLng: String,
-        @Query("pagetoken") nextPageToken: String): Response?
+        @Query("pagetoken") nextPageToken: String): NearbySearch?
 }
