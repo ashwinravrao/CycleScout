@@ -70,4 +70,7 @@ dependencies {
 
     // for implementing swipe to refresh
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+    // for logging request body
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
 }
