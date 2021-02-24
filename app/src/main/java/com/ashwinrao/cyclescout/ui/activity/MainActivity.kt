@@ -97,10 +97,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
     }
 
     override fun onMapReady(map: GoogleMap?) {
-        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, 14f))
+        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, 12f))
         map?.uiSettings?.isTiltGesturesEnabled = false
-        map?.uiSettings?.isZoomGesturesEnabled = false
-        map?.uiSettings?.isScrollGesturesEnabled = false
         map?.uiSettings?.isMapToolbarEnabled = false
         val marker = map?.addMarker(
             MarkerOptions().position(startLocation).icon(
@@ -113,7 +111,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
                         ) as VectorDrawable
                     )
                 )
-            ).title(this.getString(R.string.label_location)).anchor(0.5f, 0.5f)
+            )
         )
         if (marker != null) animateDropPin(marker, 500)
     }
