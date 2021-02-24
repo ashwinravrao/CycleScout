@@ -10,11 +10,10 @@ val repoModule = module {
 }
 
 interface Repository {
-    suspend fun fetchNearbyShops(locationBias: LatLng): NearbySearch?
-//    suspend fun fetchShopDetails(placeId: String): ShopDetails?
+    suspend fun fetchNearbyShops(locationBias: LatLng, nextPageToken: String? = null): NearbySearch?
 }
 
 class RepositoryImpl(private val placesApi: PlacesApi) : Repository {
-    override suspend fun fetchNearbyShops(locationBias: LatLng): NearbySearch? = placesApi.fetchNearbyShops("${locationBias.latitude},${locationBias.longitude}")
-//    override suspend fun fetchShopDetails(placeId: String): ShopDetails? = placesApi.fetchShopDetails(placeId)
+    override suspend fun fetchNearbyShops(locationBias: LatLng, nextPageToken: String?): NearbySearch? =
+        placesApi.fetchNearbyShops("${locationBias.latitude},${locationBias.longitude}", nextPageToken ?: "")
 }

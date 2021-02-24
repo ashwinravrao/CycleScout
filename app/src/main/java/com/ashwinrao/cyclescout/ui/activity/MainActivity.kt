@@ -1,10 +1,10 @@
 package com.ashwinrao.cyclescout.ui.activity
 
 import android.graphics.drawable.VectorDrawable
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,7 +16,6 @@ import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
 import com.ashwinrao.cyclescout.databinding.ActivityMainBinding
 import com.ashwinrao.cyclescout.ui.adapter.NearbyShopAdapter
 import com.ashwinrao.cyclescout.viewmodel.MainViewModel
-import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -52,8 +51,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
         binding.swipeRefreshLayout.setOnRefreshListener(this@MainActivity)
         setContentView(binding.root)
 
-        initializeShopList()
         initializeMap()
+        initializeShopList()
     }
 
     private fun initializeMap() {
@@ -72,23 +71,28 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
     }
 
     /**
-     * In order to lazily load the next set of results, we need to listen to shopList's scroll position.
-     * Once we reach the "bottom" of the recycler view, we can fetch the next set of results from the API.
-     * In keeping with separation of concerns, the view model keeps track of page tokens. So the first call
-     * to fetchNearbyShops() will either return the first set of results or the next page. The activity shouldn't
-     * have to know which.
+     * In order to lazily fetch the next set of results, we observe a Boolean in the recyclerview adapter which indicates
+     * when we need to make another request. The token is handled by the view model, in keeping with separation of concerns.
+     * And the trigger for the observable to flip to `true` is if we scroll to the bottom of our existing result set and
+     * show the loading indicator (it's a different view holder instantiated based on item type).
      */
     private fun fetchDataLazily() {
         fetchNearbyShops(startLocation)
-        shopList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            // todo: implement
-        })
+        adapter.fetchNextPage.observe(this) {
+            if (it) fetchNearbyShops(startLocation, nextPage = true)
+        }
     }
 
-    private fun populateShopList(shops: List<NearbySearch.Result>) {
+    /**
+     * Bind data to our recycler view adapter. If we are not appending new results from a recent API call,
+     * we can assume we are refreshing the page. If so, we need to make sure to clear out the stale data
+     * in the adapter so we can bind some fresh ones.
+     */
+    private fun populateShopList(shops: List<NearbySearch.Result>, appendingResults: Boolean = false) {
         stopLoadingAnimation()
         shopList.visibility = View.VISIBLE
-        adapter.data = shops
+        if (!appendingResults && adapter.data.isNotEmpty()) adapter.data.clear() // clear stale data on refresh
+        adapter.data.addAll(shops)
         adapter.notifyDataSetChanged()
     }
 
@@ -121,25 +125,26 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
      *
      * @return success: Boolean (whether the outcome was as expected - fresh data fetched)
      */
-    private fun fetchNearbyShops(locationBias: LatLng): Boolean {
+    private fun fetchNearbyShops(locationBias: LatLng, refresh: Boolean = false, nextPage: Boolean = false): Boolean {
         var success = false
         var message: String? = null
         CoroutineScope(Dispatchers.IO).launch {
             var nearbyShops: NearbySearch? = null
             try {
-                nearbyShops = mainViewModel.fetchNearbyShops(locationBias)
+                nearbyShops = mainViewModel.fetchNearbyShops(locationBias, refresh)
             } catch (e: Exception) {
                 message = e.message
-                Log.d(tag, "fetchNearbyShops: ${e.message}")
+                Log.d(tag, "fetchNearbyShops: ${e.printStackTrace()}")
             }
             withContext(Dispatchers.Main) {
                 if (nearbyShops != null) {
                     when (nearbyShops.status) {
                         "OK" -> {
                             success = true
-                            populateShopList(nearbyShops.results)
+                            populateShopList(nearbyShops.results, nextPage)
                         }
                         "ZERO_RESULTS" -> handleNoResults(message = "No matching results found")
+                        "INVALID_REQUEST" -> Log.e(tag, "fetchNearbyShops: INVALID_REQUEST")
                         else -> handleNoResults(message = "Something unexpected happened. Try again later")
                     }
                     Log.d(tag, "fetchNearbyShops: ${nearbyShops.status}")
@@ -167,7 +172,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
     }
 
     override fun onRefresh() {
-        fetchNearbyShops(startLocation)
+        fetchNearbyShops(startLocation, refresh = true)
         snackBar?.dismiss()
 
         // swipe to refresh animation will be dismissed when fresh data is bound to the recyclerview adapter

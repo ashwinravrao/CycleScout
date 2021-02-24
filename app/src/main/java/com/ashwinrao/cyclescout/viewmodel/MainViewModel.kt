@@ -8,7 +8,10 @@ import com.google.android.gms.maps.model.LatLng
 class MainViewModel(private val repo: RepositoryImpl) : ViewModel() {
     var nextPageToken: String? = null
 
-    suspend fun fetchNearbyShops(locationBias: LatLng): NearbySearch? {
-        return repo.fetchNearbyShops(locationBias)
+    suspend fun fetchNearbyShops(locationBias: LatLng, refresh: Boolean): NearbySearch? {
+        if (refresh) nextPageToken = null   // clear token if user requests fresh data
+        val result = repo.fetchNearbyShops(locationBias, nextPageToken)
+        nextPageToken = result?.nextPageToken
+        return result
     }
 }
