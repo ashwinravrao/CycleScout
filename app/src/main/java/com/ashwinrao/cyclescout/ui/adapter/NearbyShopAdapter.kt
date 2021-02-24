@@ -1,5 +1,6 @@
 package com.ashwinrao.cyclescout.ui.adapter
 
+import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
 import com.ashwinrao.cyclescout.databinding.ShimmerRowBinding
 import com.ashwinrao.cyclescout.databinding.ViewHolderNearbyShopBinding
 import com.ashwinrao.cyclescout.databinding.ViewHolderShimmerBinding
+import com.bumptech.glide.Glide
 import com.facebook.shimmer.Shimmer
 import java.lang.Exception
 import java.lang.NullPointerException
@@ -60,7 +62,7 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             val context = binding.root.context
             binding.shopName.text = data[position].name
 
-            // Handle null values
+            // Handle potential null values
             try {
                 if (data[position].openingHours.openNow) {
                     binding.openNow.text = context.getString(R.string.open_now)
@@ -74,7 +76,14 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     binding.openNow.text = context.getString(R.string.closed_now)
                     binding.openNow.setTextColor(context.resources.getColor(R.color.red, context.theme))
                 }
-                // todo: set image thumbnail using Glide
+
+                Glide
+                    .with(context)
+                    .load(buildUrl(context, data[position]))
+                    .thumbnail(0.1f)
+                    .centerCrop()
+                    .into(binding.shopPhoto)
+
             } catch (e: Exception) {
                 Log.e(tag, "onBindViewHolder: Exception thrown @ position: $position; message: ${e.message}")
             }
@@ -85,6 +94,9 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
         Log.d(tag, "onBindViewHolder: ${getItemViewType(position)}")
     }
+
+    private fun buildUrl(context: Context, result: NearbySearch.Result) =
+        String.format(context.getString(R.string.places_photo_url), result.photos[0].photoReference, context.getString(R.string.places_key))
 
     override fun getItemViewType(position: Int): Int {
         return when (position) {

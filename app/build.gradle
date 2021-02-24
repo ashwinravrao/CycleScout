@@ -73,4 +73,8 @@ dependencies {
 
     // for logging request body
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
+
+    // Glide (for image loading)
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
 }
