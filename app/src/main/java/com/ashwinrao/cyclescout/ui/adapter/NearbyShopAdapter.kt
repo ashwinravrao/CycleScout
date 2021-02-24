@@ -1,8 +1,10 @@
 package com.ashwinrao.cyclescout.ui.adapter
 
 import android.content.Context
+import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
@@ -25,15 +27,15 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var fetchNextPage = MutableLiveData<Boolean>()
     var data: MutableList<NearbySearch.Result> = mutableListOf()
-    set(shops) {
-        if (data.isEmpty()) {
-            field = shops
-        } else {
-            field.removeLast()
-            field.addAll(shops)
-            field.add(field.last())
+        set(shops) {
+            if (data.isEmpty()) {
+                field = shops
+            } else {
+                field.removeLast()
+                field.addAll(shops)
+                field.add(field.last())
+            }
         }
-    }
 
     fun watchData() = MutableLiveData(data)
 
@@ -74,7 +76,12 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     )
                 } else {
                     binding.openNow.text = context.getString(R.string.closed_now)
-                    binding.openNow.setTextColor(context.resources.getColor(R.color.red, context.theme))
+                    binding.openNow.setTextColor(
+                        context.resources.getColor(
+                            R.color.red,
+                            context.theme
+                        )
+                    )
                 }
 
                 Glide
@@ -85,18 +92,31 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     .into(binding.shopPhoto)
 
             } catch (e: Exception) {
-                Log.e(tag, "onBindViewHolder: Exception thrown @ position: $position; message: ${e.message}")
+                Log.e(
+                    tag,
+                    "onBindViewHolder: Exception thrown @ position: $position; message: ${e.message}"
+                )
             }
         } else {
             fetchNextPage.value = true
             val binding = ViewHolderShimmerBinding.bind(holder.itemView)
             binding.shimmerFrameLayout.startShimmer()
+
+            // time out after 8 seconds (this is the only way I could stop showing the loading animation when we reached the end of available results)
+            Handler().postDelayed({
+                binding.shimmerFrameLayout.stopShimmer()
+                binding.shimmerFrameLayout.visibility = View.GONE
+            }, 8000)
         }
         Log.d(tag, "onBindViewHolder: ${getItemViewType(position)}")
     }
 
     private fun buildUrl(context: Context, result: NearbySearch.Result) =
-        String.format(context.getString(R.string.places_photo_url), result.photos[0].photoReference, context.getString(R.string.places_key))
+        String.format(
+            context.getString(R.string.places_photo_url),
+            result.photos[0].photoReference,
+            context.getString(R.string.places_key)
+        )
 
     override fun getItemViewType(position: Int): Int {
         return when (position) {
