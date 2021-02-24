@@ -1,22 +1,24 @@
 package com.ashwinrao.cyclescout.ui.adapter
 
 import android.content.Context
+import android.graphics.drawable.ColorDrawable
 import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.ashwinrao.cyclescout.R
 import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
-import com.ashwinrao.cyclescout.databinding.ShimmerRowBinding
 import com.ashwinrao.cyclescout.databinding.ViewHolderNearbyShopBinding
 import com.ashwinrao.cyclescout.databinding.ViewHolderShimmerBinding
 import com.bumptech.glide.Glide
-import com.facebook.shimmer.Shimmer
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import java.lang.Exception
-import java.lang.NullPointerException
 
 class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -24,6 +26,8 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val dataViewType = 0
     private val loadingViewType = 1
+
+    private val shopPhotoMaxWidth = 100 //px
 
     var fetchNextPage = MutableLiveData<Boolean>()
     var data: MutableList<NearbySearch.Result> = mutableListOf()
@@ -84,12 +88,7 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     )
                 }
 
-                Glide
-                    .with(context)
-                    .load(buildUrl(context, data[position]))
-                    .thumbnail(0.1f)
-                    .centerCrop()
-                    .into(binding.shopPhoto)
+                loadThumbnail(context, position, binding.shopPhoto)
 
             } catch (e: Exception) {
                 Log.e(
@@ -97,16 +96,18 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     "onBindViewHolder: Exception thrown @ position: $position; message: ${e.message}"
                 )
             }
+
         } else {
             fetchNextPage.value = true
             val binding = ViewHolderShimmerBinding.bind(holder.itemView)
             binding.shimmerFrameLayout.startShimmer()
 
-            // time out after 8 seconds (this is the only way I could stop showing the loading animation when we reached the end of available results)
+            // timeout after 5 seconds (not sure how else to remove the animation when there are no more results)
             Handler().postDelayed({
                 binding.shimmerFrameLayout.stopShimmer()
                 binding.shimmerFrameLayout.visibility = View.GONE
-            }, 8000)
+            }, 5000)
+
         }
         Log.d(tag, "onBindViewHolder: ${getItemViewType(position)}")
     }
@@ -114,6 +115,7 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private fun buildUrl(context: Context, result: NearbySearch.Result) =
         String.format(
             context.getString(R.string.places_photo_url),
+            shopPhotoMaxWidth,
             result.photos[0].photoReference,
             context.getString(R.string.places_key)
         )
@@ -123,6 +125,19 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             data.lastIndex -> loadingViewType
             else -> dataViewType
         }
+    }
+
+    private fun loadThumbnail(context: Context, position: Int, imageView: ImageView) {
+        val options = RequestOptions()
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+        Glide
+            .with(context)
+            .setDefaultRequestOptions(options)
+            .load(buildUrl(context, data[position]))
+            .fallback(ColorDrawable(ContextCompat.getColor(context, R.color.slightly_darker_gray)))
+            .thumbnail(0.1f)
+            .centerCrop()
+            .into(imageView)
     }
 
     override fun getItemCount(): Int = data.size
