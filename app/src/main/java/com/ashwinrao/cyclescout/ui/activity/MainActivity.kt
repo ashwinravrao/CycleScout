@@ -78,8 +78,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
      */
     private fun fetchDataLazily() {
         fetchNearbyShops(startLocation)
-        adapter.fetchNextPage.observe(this) {
+        adapter.fetchNextPage.observe(this@MainActivity) {
             if (it) fetchNearbyShops(startLocation, nextPage = true)
+        }
+
+        mainViewModel.endOfResults.observe(this@MainActivity) {
+            if (it) {
+                val loadingVH =
+                    shopList.findViewHolderForAdapterPosition(adapter.data.lastIndex) as NearbyShopAdapter.LoadingViewHolder
+                loadingVH.binding.shimmerFrameLayout.hideShimmer()
+                loadingVH.itemView.visibility = View.GONE
+            }
         }
     }
 
@@ -92,13 +101,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
         stopLoadingAnimation()
         shopList.visibility = View.VISIBLE
         if (!appendingResults && adapter.data.isNotEmpty()) adapter.data.clear() // clear stale data on refresh
-        adapter.data.addAll(shops)
+        adapter.data = shops as MutableList<NearbySearch.Result>
         adapter.notifyDataSetChanged()
     }
 
     override fun onMapReady(map: GoogleMap?) {
         map?.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, 12f))
         map?.uiSettings?.isTiltGesturesEnabled = false
+        map?.uiSettings?.isZoomGesturesEnabled = false
+        map?.uiSettings?.isScrollGesturesEnabled = false
         map?.uiSettings?.isMapToolbarEnabled = false
         val marker = map?.addMarker(
             MarkerOptions().position(startLocation).icon(
@@ -173,7 +184,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
         fetchNearbyShops(startLocation, refresh = true)
         snackBar?.dismiss()
 
-        // swipe to refresh animation will be dismissed when fresh data is bound to the recyclerview adapter
+        // swipe to refresh animation will be dismissed when fresh data is bound to the recyclerview
         adapter.watchData().observe(this@MainActivity) {
             binding.swipeRefreshLayout.isRefreshing = false
         }

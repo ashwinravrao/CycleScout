@@ -16,6 +16,7 @@ import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
 import com.ashwinrao.cyclescout.databinding.ViewHolderNearbyShopBinding
 import com.ashwinrao.cyclescout.databinding.ViewHolderShimmerBinding
 import com.bumptech.glide.Glide
+import com.bumptech.glide.Priority
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import java.lang.Exception
@@ -30,6 +31,15 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val shopPhotoMaxWidth = 100 //px
 
     var fetchNextPage = MutableLiveData<Boolean>()
+
+    /**
+     * The below setter logic ensures we show a loading animation at the end of our data set.
+     * When we bind the view holder that contains this animation, fetchNextPage is updated.
+     * The activity owner observes this value to know when to request the next set of results.
+     * If no additional results are available, we access the loading view holder from the activity
+     * and hide the animation. There is additional logic in the view model to ensure additional
+     * requests are not sent after we've reached the end of the available results.
+     */
     var data: MutableList<NearbySearch.Result> = mutableListOf()
         set(shops) {
             if (data.isEmpty()) {
@@ -37,8 +47,8 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             } else {
                 field.removeLast()
                 field.addAll(shops)
-                field.add(field.last())
             }
+            field.add(shops.last())
         }
 
     fun watchData() = MutableLiveData(data)
@@ -68,7 +78,6 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             val context = binding.root.context
             binding.shopName.text = data[position].name
 
-            // Handle potential null values
             try {
                 if (data[position].openingHours.openNow) {
                     binding.openNow.text = context.getString(R.string.open_now)
@@ -101,13 +110,6 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             fetchNextPage.value = true
             val binding = ViewHolderShimmerBinding.bind(holder.itemView)
             binding.shimmerFrameLayout.startShimmer()
-
-            // timeout after 5 seconds (not sure how else to remove the animation when there are no more results)
-            Handler().postDelayed({
-                binding.shimmerFrameLayout.stopShimmer()
-                binding.shimmerFrameLayout.visibility = View.GONE
-            }, 5000)
-
         }
         Log.d(tag, "onBindViewHolder: ${getItemViewType(position)}")
     }
@@ -130,12 +132,15 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private fun loadThumbnail(context: Context, position: Int, imageView: ImageView) {
         val options = RequestOptions()
             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            .error(ColorDrawable(ContextCompat.getColor(context, R.color.slightly_darker_gray)))
         Glide
             .with(context)
             .setDefaultRequestOptions(options)
             .load(buildUrl(context, data[position]))
             .fallback(ColorDrawable(ContextCompat.getColor(context, R.color.slightly_darker_gray)))
+            .placeholder(ColorDrawable(ContextCompat.getColor(context, R.color.slightly_darker_gray)))
             .thumbnail(0.1f)
+            .priority(Priority.HIGH)
             .centerCrop()
             .into(imageView)
     }
@@ -145,6 +150,6 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     inner class NearbyShopViewHolder(binding: ViewHolderNearbyShopBinding) :
         RecyclerView.ViewHolder(binding.root)
 
-    inner class LoadingViewHolder(binding: ViewHolderShimmerBinding) :
+    inner class LoadingViewHolder(val binding: ViewHolderShimmerBinding) :
         RecyclerView.ViewHolder(binding.root)
 }
