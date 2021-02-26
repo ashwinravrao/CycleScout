@@ -13,11 +13,6 @@ import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
 import com.google.android.gms.maps.model.Marker
 import kotlin.math.max
 
-const val RESULT_EXTRA = "result_extra"
-const val START_LATITUDE = 41.88744282963304
-const val START_LONGITUDE = -87.65274711534346
-const val METER_TO_MILE_CONVERSION_FACTOR = 1609.344
-
 fun dpToPx(context: Context, dp: Float) =
     TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics).toInt()
 
