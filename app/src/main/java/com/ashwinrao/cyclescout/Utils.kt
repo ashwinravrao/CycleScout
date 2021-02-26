@@ -9,9 +9,14 @@ import android.os.SystemClock
 import android.util.TypedValue
 import android.view.animation.Interpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
+import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
 import com.google.android.gms.maps.model.Marker
 import kotlin.math.max
 
+const val RESULT_EXTRA = "result_extra"
+const val START_LATITUDE = 41.88744282963304
+const val START_LONGITUDE = -87.65274711534346
+const val METER_TO_MILE_CONVERSION_FACTOR = 1609.344
 
 fun dpToPx(context: Context, dp: Float) =
     TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics).toInt()
@@ -47,3 +52,14 @@ fun bitmapFromDrawable(vectorDrawable: VectorDrawable): Bitmap? {
     vectorDrawable.draw(canvas)
     return bitmap
 }
+
+/**
+ * Generates the image URL that Glide uses to asynchronously fetch and bind to a particular ImageView object.
+ */
+fun buildImageUrl(context: Context, result: NearbySearch.Result, shopPhotoMaxWidth: Int = 100) =
+    String.format(
+        context.getString(R.string.places_photo_url),
+        shopPhotoMaxWidth,
+        result.photos[0].photoReference,
+        context.getString(R.string.places_key)
+    )

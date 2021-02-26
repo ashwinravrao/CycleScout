@@ -23,21 +23,25 @@ class MainViewModel(private val repo: RepositoryImpl) : ViewModel() {
     suspend fun fetchNearbyShops(locationBias: LatLng, refresh: Boolean): NearbySearch? {
         var result: NearbySearch? = null
         if (refresh) {
-            endOfResults.value = false
+            setEndOfResults(value = false)
             nextPageToken = null
         }
         if (endOfResults.value != true) {
             result = repo.fetchNearbyShops(locationBias, nextPageToken)
             nextPageToken = result?.nextPageToken
             if (nextPageToken.isNullOrBlank()) {
-                withContext(Dispatchers.Main) {
-                    endOfResults.value = true
-                }
+                setEndOfResults()
             }
             if (endOfResults.value!!) {
                 Log.d(tag, "fetchNearbyShops: End of results. Next page token: $nextPageToken")
             }
         }
         return result
+    }
+
+    private suspend fun setEndOfResults(value: Boolean = true) {
+        withContext(Dispatchers.Main) {
+            endOfResults.value = value
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.ashwinrao.cyclescout.data.remote
 
 import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
+import com.ashwinrao.cyclescout.data.remote.response.ShopAddress
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -18,11 +19,8 @@ interface PlacesApi {
         @Query("pagetoken") nextPageToken: String): NearbySearch?
 
     /**
-     * Request a photo for each shop in our result set. In order to get the correct photo, we must pass in the reference String from
-     * NearbySearch.Result.Photo
-     *
-     * @return URL for an image in its original aspect ratio with a max width of 1000px (later resized for thumbnails)
+     * Request the street address for a particular shop in our result set, referencing the place_id field from the nearby search response object.
      */
-    @GET("photo?&maxwidth=1000")
-    suspend fun fetchPhotoURL(@Query("photoreference") photoReference: String): String
+    @GET("details/json?&fields=address_component")
+    suspend fun fetchShopAddress(@Query("place_id") placeId: String): ShopAddress?
 }

@@ -1,8 +1,7 @@
 package com.ashwinrao.cyclescout.ui.adapter
 
 import android.content.Context
-import android.graphics.drawable.ColorDrawable
-import android.os.Handler
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,14 +11,15 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.ashwinrao.cyclescout.R
+import com.ashwinrao.cyclescout.RESULT_EXTRA
+import com.ashwinrao.cyclescout.buildImageUrl
 import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
 import com.ashwinrao.cyclescout.databinding.ViewHolderNearbyShopBinding
 import com.ashwinrao.cyclescout.databinding.ViewHolderShimmerBinding
+import com.ashwinrao.cyclescout.ui.activity.DetailActivity
+import com.ashwinrao.cyclescout.ui.activity.MainActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
-import java.lang.Exception
 
 class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -79,22 +79,15 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             binding.shopName.text = data[position].name
 
             try {
-                if (data[position].openingHours.openNow) {
-                    binding.openNow.text = context.getString(R.string.open_now)
-                    binding.openNow.setTextColor(
-                        context.resources.getColor(
-                            R.color.green,
-                            context.theme
-                        )
-                    )
-                } else {
-                    binding.openNow.text = context.getString(R.string.closed_now)
-                    binding.openNow.setTextColor(
-                        context.resources.getColor(
-                            R.color.red,
-                            context.theme
-                        )
-                    )
+                when (data[position].openingHours.openNow) {
+                    true -> {
+                        binding.openNow.text = context.getString(R.string.open_now)
+                        binding.openNow.setTextColor(ContextCompat.getColor(context, R.color.green))
+                    }
+                    false -> {
+                        binding.openNow.text = context.getString(R.string.closed_now)
+                        binding.openNow.setTextColor(ContextCompat.getColor(context, R.color.red))
+                    }
                 }
 
                 loadThumbnail(context, position, binding.shopPhoto)
@@ -114,13 +107,13 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         Log.d(tag, "onBindViewHolder: ${getItemViewType(position)}")
     }
 
-    private fun buildUrl(context: Context, result: NearbySearch.Result) =
-        String.format(
-            context.getString(R.string.places_photo_url),
-            shopPhotoMaxWidth,
-            result.photos[0].photoReference,
-            context.getString(R.string.places_key)
-        )
+//    private fun buildUrl(context: Context, result: NearbySearch.Result) =
+//        String.format(
+//            context.getString(R.string.places_photo_url),
+//            shopPhotoMaxWidth,
+//            result.photos[0].photoReference,
+//            context.getString(R.string.places_key)
+//        )
 
     override fun getItemViewType(position: Int): Int {
         return when (position) {
@@ -130,15 +123,9 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     private fun loadThumbnail(context: Context, position: Int, imageView: ImageView) {
-        val options = RequestOptions()
-            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-            .error(ColorDrawable(ContextCompat.getColor(context, R.color.slightly_darker_gray)))
         Glide
             .with(context)
-            .setDefaultRequestOptions(options)
-            .load(buildUrl(context, data[position]))
-            .fallback(ColorDrawable(ContextCompat.getColor(context, R.color.slightly_darker_gray)))
-            .placeholder(ColorDrawable(ContextCompat.getColor(context, R.color.slightly_darker_gray)))
+            .load(buildImageUrl(context, data[position]))
             .thumbnail(0.1f)
             .priority(Priority.HIGH)
             .centerCrop()
@@ -147,8 +134,18 @@ class NearbyShopAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemCount(): Int = data.size
 
-    inner class NearbyShopViewHolder(binding: ViewHolderNearbyShopBinding) :
-        RecyclerView.ViewHolder(binding.root)
+    inner class NearbyShopViewHolder(private val binding: ViewHolderNearbyShopBinding) : RecyclerView.ViewHolder(binding.root), View.OnClickListener {
+
+        init {
+            binding.root.setOnClickListener(this@NearbyShopViewHolder)
+        }
+
+        override fun onClick(v: View?) {
+            val intent = Intent(binding.root.context, DetailActivity::class.java)
+            intent.putExtra(RESULT_EXTRA, data[adapterPosition])
+            (binding.root.context as MainActivity).startActivity(intent)
+        }
+    }
 
     inner class LoadingViewHolder(val binding: ViewHolderShimmerBinding) :
         RecyclerView.ViewHolder(binding.root)

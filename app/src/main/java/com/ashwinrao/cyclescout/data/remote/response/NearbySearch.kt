@@ -2,6 +2,7 @@ package com.ashwinrao.cyclescout.data.remote.response
 
 
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
 data class NearbySearch(
     @SerializedName("html_attributions")
@@ -46,46 +47,46 @@ data class NearbySearch(
         val userRatingsTotal: Int, // 1105
         @SerializedName("vicinity")
         val vicinity: String // Level 1, 2 and 3, Overseas Passenger Terminal, Circular Quay W, The Rocks
-    ) {
+    ) : Serializable {
         data class Geometry(
             @SerializedName("location")
             val location: Location,
             @SerializedName("viewport")
             val viewport: Viewport
-        ) {
+        ): Serializable {
             data class Location(
                 @SerializedName("lat")
                 val lat: Double, // -33.8587323
                 @SerializedName("lng")
                 val lng: Double // 151.2100055
-            )
+            ): Serializable
 
             data class Viewport(
                 @SerializedName("northeast")
                 val northeast: Northeast,
                 @SerializedName("southwest")
                 val southwest: Southwest
-            ) {
+            ): Serializable {
                 data class Northeast(
                     @SerializedName("lat")
                     val lat: Double, // -33.85739417010727
                     @SerializedName("lng")
                     val lng: Double // 151.2112278798927
-                )
+                ): Serializable
 
                 data class Southwest(
                     @SerializedName("lat")
                     val lat: Double, // -33.86009382989272
                     @SerializedName("lng")
                     val lng: Double // 151.2085282201073
-                )
+                ): Serializable
             }
         }
 
         data class OpeningHours(
             @SerializedName("open_now")
             val openNow: Boolean // false
-        )
+        ): Serializable
 
         data class Photo(
             @SerializedName("height")
@@ -96,13 +97,13 @@ data class NearbySearch(
             val photoReference: String, // ATtYBwIv7JuAxvjZA6Jr3aDABxV3kDNzW0eFAyhSxj_WmW8Z0SdbVGmGRR_KGi6cfKgai-oUSQ2fp6d5qkKjc2M-LKvY7fuR2czdwHVdY7gtS8iEqyhMieznSTNkElpJv5A6Uqd3Vy6Sfd9LFYP1LeK9w7BmzX2oa0xcbUDBphTyevlgUAq4
             @SerializedName("width")
             val width: Int // 766
-        )
+        ): Serializable
 
         data class PlusCode(
             @SerializedName("compound_code")
             val compoundCode: String, // 46R6+G2 The Rocks, New South Wales
             @SerializedName("global_code")
             val globalCode: String // 4RRH46R6+G2
-        )
+        ): Serializable
     }
 }

@@ -9,9 +9,8 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.ashwinrao.cyclescout.*
 import com.ashwinrao.cyclescout.R
-import com.ashwinrao.cyclescout.animateDropPin
-import com.ashwinrao.cyclescout.bitmapFromDrawable
 import com.ashwinrao.cyclescout.data.remote.response.NearbySearch
 import com.ashwinrao.cyclescout.databinding.ActivityMainBinding
 import com.ashwinrao.cyclescout.ui.adapter.NearbyShopAdapter
@@ -39,11 +38,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, SwipeRefreshLayout
     private val mainViewModel: MainViewModel by viewModel()
 
     /**
-     * Start location that serves as the bias for Google Places API calls.
+     * Start location that serves as the "bias" for Google Places API calls.
      * The value has been hardcoded in the interest of time. Normally I would want to either
      * get user input or access the device location.
      */
-    private val startLocation = LatLng(41.88744282963304, -87.65274711534346)   // SRAM HQ in downtown Chicago
+    private val startLocation = LatLng(START_LATITUDE, START_LONGITUDE)   // SRAM HQ in downtown Chicago
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
