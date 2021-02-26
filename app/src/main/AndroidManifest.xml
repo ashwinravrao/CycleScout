@@ -7,6 +7,12 @@
         android:required="true"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
+    <!-- The screen orientation for both activities has been set to portrait for the time being. I had implemented caching
+    in the view model and was saving the recycler view scroll position in MainActivity. But due to the way I implemented
+    lazy loading, my caching solution effectively broke pagination. Being that lazy loading was a minimum requirement, and given
+    the limited time to complete this assessment, I decided to keep the app functioning in portrait mode and explain my approach
+    and/or what I would do differently during the interview. -->
+
     <application
         android:name=".CycleScout"
         android:allowBackup="true"
@@ -15,13 +21,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CycleScout">
-        <activity android:name=".ui.activity.MainActivity">
+        <activity android:name=".ui.activity.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.DetailActivity"/>
+        <activity android:name=".ui.activity.DetailActivity"
+            android:screenOrientation="portrait"/>
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
