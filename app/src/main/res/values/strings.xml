@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">CycleScout</string>
+    <string name="open_now">Open</string>
+    <string name="closed_now">Closed</string>
+    <string name="exception_no_internet">No internet connection!</string>
+    <string name="label_location">Your Location</string>
+    <string name="retry">RETRY</string>
+    <string name="places_url" templateMergeStrategy="preserve" translatable="false">https://maps.googleapis.com/maps/api/place/</string>
+    <string name="places_photo_url" templateMergeStrategy="preserve" translatable="false">https://maps.googleapis.com/maps/api/place/photo?&amp;maxwidth=%1$d&amp;photoreference=%2$s&amp;key=%3$s</string>
 </resources>
